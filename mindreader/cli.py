@@ -1,4 +1,4 @@
-"""Command line entry point: `mindreader play | bots | tournament`."""
+"""Command line entry point: `mindreader play | bots | duel | tournament`."""
 
 from __future__ import annotations
 
@@ -11,15 +11,61 @@ from mindreader import display
 from mindreader.bots import all_bots
 from mindreader.game import Match, Move, iter_duel, run_duel
 
+DEFAULT_BOT = "markov"
+MENU_ORDER = ("random_bot", "frequency", "markov") # Priority list at the start. Other bots are discovered
+
+
+def _menu_order(bots):
+    return [bot_id for bot_id in MENU_ORDER if bot_id in bots] + [
+        bot_id for bot_id in bots if bot_id not in MENU_ORDER
+    ]
+
+
+def resolve_bot_choice(text, bots, default_id):
+    text = text.strip()
+    if not text:
+        return default_id
+    if text.isdigit():
+        number = int(text)
+        if 1 <= number <= len(bots):
+            return list(bots)[number - 1]
+        return None
+    lowered = text.lower()
+    for bot_id, cls in bots.items():
+        if lowered in (bot_id.lower(), cls.name.lower()):
+            return bot_id
+    return None
+
+
+def choose_bot(bots, default_id):
+    ordered = {bot_id: bots[bot_id] for bot_id in _menu_order(bots)}
+    while True:
+        display.bot_menu(ordered, default_id)
+        try:
+            choice = input()
+        except (EOFError, KeyboardInterrupt):
+            print()
+            return default_id
+        bot_id = resolve_bot_choice(choice, ordered, default_id)
+        if bot_id is not None:
+            print()
+            return bot_id
+        print(display.paint("  Unknown choice. Enter a number, id, or name.\n", "yellow"))
+
 
 def cmd_play(args) -> None:
     bots = all_bots()
-    if args.bot not in bots:
+    default_id = DEFAULT_BOT if DEFAULT_BOT in bots else next(iter(bots))
+    if args.bot is not None and args.bot not in bots:
         sys.exit(f"Unknown bot '{args.bot}'. Try one of: {', '.join(bots)}")
-    bot = bots[args.bot]()
+    display.banner()
+    if (args.bot is None or args.select) and sys.stdin.isatty():
+        bot_id = choose_bot(bots, default_id)
+    else:
+        bot_id = args.bot or default_id
+    bot = bots[bot_id]()
     match = Match()
 
-    display.banner()
     display.intro(bot, args.rounds)
     number = 1
     while number <= args.rounds:
@@ -94,7 +140,8 @@ def main(argv=None) -> None:
     sub = parser.add_subparsers(dest="command")
 
     play = sub.add_parser("play", help="play against a bot (default)")
-    play.add_argument("--bot", default="markov", help="bot id, see `mindreader bots`")
+    play.add_argument("--bot", default=None, help="bot id (skips the opponent menu)")
+    play.add_argument("-i", "--select", action="store_true", help="always show the opponent menu")
     play.add_argument("--rounds", type=int, default=10)
     play.set_defaults(func=cmd_play)
 

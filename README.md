@@ -11,7 +11,7 @@ This is a beginner-friendly open source project for the **OSGuild workshop**. It
 ```bash
 git clone https://github.com/sadeeqrabiu/Mind-Reader-Arena.git
 cd Mind-Reader-Arena
-python3 -m mindreader            # play vs the Mind Reader (10 rounds)
+python3 -m mindreader            # choose an opponent, play 10 rounds
 ```
 
 Requires Python 3.9+. Nothing to install.
@@ -20,7 +20,9 @@ Requires Python 3.9+. Nothing to install.
 
 | Command | What it does |
 |---|---|
-| `python3 -m mindreader play --bot frequency --rounds 5` | Play against a specific bot |
+| `python3 -m mindreader play` | Choose an opponent interactively, then play |
+| `python3 -m mindreader play --bot frequency --rounds 5` | Play a specific bot (skips the menu) |
+| `python3 -m mindreader play --select` | Always show the opponent menu |
 | `python3 -m mindreader bots` | List every bot in the arena |
 | `python3 -m mindreader duel random_bot markov --rounds 5` | Watch two bots fight round-by-round 🍿 |
 | `python3 -m mindreader tournament` | Every bot fights every other bot and you get a leaderboard 🏆 |
@@ -50,7 +52,7 @@ Round 3/10, your move: r
 
 ```
 mindreader/
-├── cli.py        # commands: play, bots, tournament
+├── cli.py        # commands: play, bots, duel, tournament
 ├── game.py       # rules + scoring (pure logic, no printing)
 ├── display.py    # colors, emoji, scoreboards
 └── bots/         # 👈 one file = one bot, auto-discovered

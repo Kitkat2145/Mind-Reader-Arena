@@ -40,17 +40,26 @@ def intro(bot, rounds: int) -> None:
     print(paint(f"{rounds} rounds. Type r / p / s (or q to quit).\n", "dim"))
 
 
-def show_round(number: int, bot, rnd: RoundResult, taunt: str) -> None:
+def show_round(number: int, bot, rnd: RoundResult, taunt: str,
+               match: Match | None = None, total: int | None = None) -> None:
     if rnd.result > 0:
         verdict = paint("You win!", "green")
     elif rnd.result < 0:
         verdict = paint("Bot wins!", "red")
     else:
         verdict = paint("Tie.", "yellow")
+
+    round_label = f"Round {number}/{total}" if total else f"Round {number}"
     print(
-        f"  Round {number}: you {rnd.player.emoji}  vs  {rnd.bot.emoji} {bot.name}  →  {verdict}")
+        f"  {round_label}: you {rnd.player.emoji}  vs  {rnd.bot.emoji} {bot.name}  →  {verdict}")
     print(paint(
-        f"  {bot.emoji} \"I was {rnd.confidence:.0%} sure you'd throw {rnd.guess.label}.\" {taunt}\n", "dim"))
+        f"  {bot.emoji} \"I was {rnd.confidence:.0%} sure you'd throw {rnd.guess.label}.\" {taunt}", "dim"))
+
+    if match is not None:
+        print(paint(
+            f"  📊 Score: You {match.player_score}  ·  {bot.name} {match.bot_score}"
+            f"  (Ties: {match.ties})", "dim"))
+    print()
 
 
 def final_score(bot, match: Match) -> None:

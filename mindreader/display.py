@@ -74,6 +74,32 @@ def bot_list(bots) -> None:
               cls.name}: {cls.description}")
 
 
+def bot_menu(bots, default_id) -> None:
+    """
+    Shows interactive bot selection menu on:
+    * python -m mindreader
+    * python -m mindreader play
+    * Also applies for --rounds and --select flags
+    """
+
+    print(paint("🔮 CHOOSE YOUR OPPONENT:", "bold"))
+    for number, (bot_id, cls) in enumerate(bots.items(), 1):
+        default = paint(" (Default)", "dim") if bot_id == default_id else ""
+        print(
+            f"  [{number}] {cls.emoji} {paint(f'{cls.name:<18}', 'bold')} "
+            f"{paint(f'{bot_id:<16}', 'dim')} {cls.description}{default}"
+        )
+
+    print(
+        paint(
+            f"\nChoose a bot [1-{len(bots)}, id/name, or press Enter for "
+            f"{bots[default_id].name}]: ",
+            "cyan",
+        ),
+        end="",
+    )
+
+
 def duel_intro(bot_a, bot_b, rounds: int) -> None:
     print(f"{bot_a.emoji} {paint(bot_a.name, 'bold')}  vs  {bot_b.emoji} {paint(bot_b.name, 'bold')}")
     print(paint(f"{bot_a.name}: {bot_a.description}", "dim"))
